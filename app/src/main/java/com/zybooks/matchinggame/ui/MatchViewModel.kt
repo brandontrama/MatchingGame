@@ -1,12 +1,13 @@
-package com.zybooks.matchinggame.ui.theme.ui
+package com.zybooks.matchinggame.ui
 
 import androidx.lifecycle.ViewModel
+import com.zybooks.matchinggame.data.CardDataSource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 data class MyCard(
-    val id: Int = 0,
+    val id: Int,
     val name: String,
     val isFlipped: Boolean = false,
     val isMatched: Boolean = false
@@ -17,11 +18,8 @@ data class GameState(
 )
 
 class MatchViewModel : ViewModel() {
-    private val cardNames = listOf("One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight",
-                                    "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight").shuffled()
-
     private val _gameState = MutableStateFlow(
-        GameState(cards = cardNames.map { MyCard(name = it) })
+        GameState(cards = CardDataSource().loadCards().shuffled())
     )
 
     val gameState: StateFlow<GameState> =_gameState.asStateFlow()
