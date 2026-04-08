@@ -3,18 +3,53 @@ package com.zybooks.matchinggame
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import com.zybooks.matchinggame.ui.theme.MatchingGameTheme
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.zybooks.matchinggame.ui.MatchScreen
+import com.zybooks.matchinggame.ui.WelcomeScreen
+import com.zybooks.matchinggame.ui.theme.MatchingGameTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             MatchingGameTheme {
-                MatchScreen()
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    MatchingGameApp()
+                }
             }
+        }
+    }
+}
+
+@Composable
+fun MatchingGameApp() {
+    val navController = rememberNavController()
+
+    NavHost(
+        navController = navController,
+        startDestination = "welcome"
+    ) {
+        composable("welcome") {
+            WelcomeScreen(
+                onStartGame = {
+                    navController.navigate("match") {
+                        popUpTo("welcome") { inclusive = true }
+                    }
+                }
+            )
+        }
+        composable("match") {
+            MatchScreen()
         }
     }
 }

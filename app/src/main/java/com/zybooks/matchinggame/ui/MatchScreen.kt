@@ -1,13 +1,15 @@
 package com.zybooks.matchinggame.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -24,14 +26,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.zybooks.matchinggame.R
 
 @Composable
 fun MatchScreen(
-    viewModel: MatchViewModel = viewModel()
+    viewModel: MatchViewModel = viewModel(),
+    onGameComplete: () -> Unit = {}
 ) {
     val gameState by viewModel.gameState.collectAsState()
 
@@ -40,7 +45,10 @@ fun MatchScreen(
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             ScorePanel(score = gameState.score)
-            CardGrid(cards = gameState.cards)
+            CardGrid(
+                cards = gameState.cards,
+                onCardClick = { card -> viewModel.onCardClicked(card) }
+            )
         }
     }
 }
@@ -69,24 +77,31 @@ fun ScorePanel(score: Int = 0) {
         textAlign = TextAlign.End,
         lineHeight = 30.sp,
         modifier = Modifier.fillMaxWidth()
-                            .background(Color(0xFFFFF7C0))
-                            .padding(16.dp)
+            .background(Color(0xFFFFF7C0))
+            .padding(16.dp)
     )
 }
 
 @Composable
-fun CardGrid(cards: List<MyCard>) {
+fun CardGrid(cards: List<MyCard>, onCardClick: (MyCard) -> Unit) {
     LazyVerticalGrid(columns = GridCells.Fixed(4)) {
         items(cards) { card ->
-            CardItem(card = card)
+            CardItem(card = card, onCardClick = onCardClick)
         }
     }
 }
 
 @Composable
-fun CardItem(card: MyCard) {
+fun CardItem(card: MyCard, onCardClick: (MyCard) -> Unit) {
     Card(
-        modifier = Modifier.padding(4.dp).aspectRatio(0.65f),
+        modifier = Modifier
+            .padding(4.dp)
+            .aspectRatio(0.65f)
+            .clickable {
+                if (!card.isMatched && !card.isFlipped) {
+                    onCardClick(card)
+                }
+            },
         shape = RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -94,16 +109,36 @@ fun CardItem(card: MyCard) {
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight()
-                .background(Color(0xFF42405A))
+                .background(
+                    if (card.isFlipped || card.isMatched) Color(0xFFD7D7D7) else Color(0xFF2A2845)
+                )
                 .padding(4.dp)
-                .size(80.dp))
-        {
-            Text(
-                text = card.name,
-                color = Color.White,
-                fontSize = 24.sp,
-                textAlign = TextAlign.Center,
-                lineHeight = 30.sp)
+        ) {
+            if (card.isFlipped) {
+                Text(
+                    text = card.name,
+                    color = Color.Black,
+                    fontSize = 24.sp,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 30.sp
+                )
+            } else {
+                Image(
+                    painter = painterResource(id = R.drawable.card_back),
+                    contentDescription = "Card Back",
+                    modifier = Modifier.fillMaxSize(),
+                    alignment = Alignment.Center
+                )
+            }
+            if (card.isMatched) {
+                Text(
+                    text = card.name,
+                    color = Color(0xFF4E8A2D),
+                    fontSize = 24.sp,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 30.sp
+                )
+            }
         }
     }
 }
