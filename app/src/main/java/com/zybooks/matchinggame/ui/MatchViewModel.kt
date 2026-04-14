@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
 
 data class MyCard(
     val id: Int,
@@ -79,8 +81,8 @@ class MatchViewModel : ViewModel() {
             secondCardIndex = null
             isProcessing = false
         } else {
-            kotlinx.coroutines.MainScope().launch {
-                kotlinx.coroutines.delay(1000)
+            MainScope().launch {
+                delay(1000)
 
                 _gameState.update { currentState ->
                     val updatedCards = currentState.cards.toMutableList()
@@ -103,5 +105,12 @@ class MatchViewModel : ViewModel() {
                 isProcessing = false
             }
         }
+    }
+
+    fun resetGame() {
+        _gameState.value = GameState(cards = CardDataSource().loadCards().shuffled(), score = 0)
+        firstCardIndex = null
+        secondCardIndex = null
+        isProcessing = false
     }
 }

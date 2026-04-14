@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.zybooks.matchinggame.ui.GameOverScreen
 import com.zybooks.matchinggame.ui.MatchScreen
 import com.zybooks.matchinggame.ui.WelcomeScreen
 import com.zybooks.matchinggame.ui.theme.MatchingGameTheme
@@ -49,7 +50,32 @@ fun MatchingGameApp() {
             )
         }
         composable("match") {
-            MatchScreen()
+            MatchScreen(
+                onEndGame = {
+                    navController.navigate("welcome") {
+                        popUpTo("match") { inclusive = true }
+                    }
+                },
+                onGameOver = {
+                    navController.navigate("gameOver") {
+                        popUpTo("match") { inclusive = true }
+                    }
+                }
+            )
+        }
+        composable("gameOver") {
+            GameOverScreen(
+                onBack = {
+                    navController.navigate("welcome") {
+                        popUpTo("gameOver") { inclusive = true }
+                    }
+                },
+                onRestart = {
+                    navController.navigate("match") {
+                        popUpTo("gameOver") { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }

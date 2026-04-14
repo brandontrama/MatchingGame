@@ -3,8 +3,10 @@ package com.zybooks.matchinggame.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +16,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -21,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -36,18 +40,30 @@ import com.zybooks.matchinggame.R
 @Composable
 fun MatchScreen(
     viewModel: MatchViewModel = viewModel(),
-    onGameComplete: () -> Unit = {}
+    onEndGame: () -> Unit,
+    onGameOver: () -> Unit
 ) {
     val gameState by viewModel.gameState.collectAsState()
 
+    LaunchedEffect(gameState.score) {
+        if (gameState.score <= -4) {
+            onGameOver()
+        }
+    }
+
     Scaffold(
         topBar = { TopBar() },
+        modifier = Modifier.fillMaxSize().background(Color(0xFF14275D))
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             ScorePanel(score = gameState.score)
             CardGrid(
                 cards = gameState.cards,
                 onCardClick = { card -> viewModel.onCardClicked(card) }
+            )
+            gameButtons(
+                onEndGame = onEndGame,
+                onResetGame = { viewModel.resetGame() }
             )
         }
     }
@@ -139,6 +155,25 @@ fun CardItem(card: MyCard, onCardClick: (MyCard) -> Unit) {
                     lineHeight = 30.sp
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun gameButtons(
+    onEndGame: () -> Unit,
+    onResetGame: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        Button(onClick = onEndGame) {
+            Text(text = "End the Game")
+        }
+        Button(onClick = onResetGame) {
+            Text(text = "Reset the Game")
         }
     }
 }
